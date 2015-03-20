@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Introduction to Blaze live templating engine</title>
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="../css/reveal.css">
+		<link rel="stylesheet" href="../css/serif.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="../css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? '../css/pdf.css' : '../css/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="../js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<div class="slides">
+
+				<section>
+                    <img src="img/meteor_milano.png"/>
+					<h2>Introduction to Blaze live templating engine and more</h2>
+                </section>
+
+                <!--
+                -- references --
+                https://atmospherejs.com/meteor/blaze
+                https://www.meteor.com/blaze
+                https://atmospherejs.com/meteor/tracker
+                https://www.meteor.com/tracker
+                https://www.meteor.com/mini-databases
+                http://www.slideshare.net/scandiweb/meteor-presentation-42641921
+                https://www.discovermeteor.com/blog/spacebars-secrets-exploring-meteor-new-templating-engine/
+                https://www.meteor.com/ddp
+                https://meteorhacks.com/introduction-to-ddp.html
+                http://stephenwalther.com/archive/2014/12/05/dont-do-react-understanding-meteor-reactive-programming
+
+                http://www.accessify.com/tools-and-wizards/developer-tools/quick-escape/default.php
+                -->
+
+				<section data-markdown>
+					## Luca Zulian
+					### developer
+				</section>
+
+				<section data-markdown data-background-color="rgb(174, 207, 237)">
+### Summary
+
+1. #### What is **Blaze**
+2. #### **Tracker**
+3. #### **Spacebars**
+4. #### Meteor app structure
+5. #### **IronRouter**
+
+				</section>
+
+                <section data-markdown>
+
+### What is **Blaze**
+Blaze is a powerful library for creating user interfaces by writing reactive HTML templates
+
+1. #### reactive DOM engine (builds and manages the DOM at runtime)
+2. #### template compiler (flagship template syntax is **Spacebars**)
+
+Integrated with Tracker's "transparent reactivity" and Minimongo's database cursors, the DOM updates automatically
+
+                </section>
+
+                <section data-markdown>
+
+### **Tracker**
+Meteor Tracker is a library for transparent reactive programming in JavaScript,
+it's a simple interface that lets reactive data sources talk to reactive data consumers
+
+Meteor has several types of reactive data sources such as:
+
+1. #### Session object
+2. #### Reactive variables
+3. #### Minimongo
+4. #### Meteor.user(), Meteor.status()
+
+These objects create Tracker dependency objects for you internally (reactivity for free)
+
+                </section>
+
+                <section data-markdown>
+
+### **Spacebars**
+Spacebars and [Handlebars](http://handlebarsjs.com/) share the same syntax, but Spacebars brings quite a few Meteor-specific innovations
+
+1. #### Template everywhere
+2. #### Creating custom helpers
+3. #### Dealing with HTML attributes
+
+                </section>
+
+                <section data-markdown>
+
+### **Handlebars**
+Handlebars templates look like regular HTML, with embedded handlebars expressions
+
+```
+&lt;div class=&quot;entry&quot;&gt;
+    {{!-- this is a comment --}}
+    &lt;h1&gt;{{title}}&lt;/h1&gt;
+    &lt;div class=&quot;body&quot;&gt;
+        {{body}}
+    &lt;/div&gt;
+&lt;/div&gt;
+```
+
+```{{```, some contents, followed by a ```}}```
+
+                </section>
+
+                <section data-markdown>
+
+### **Handlebars**
+You can use the ```if``` helper to conditionally render a block
+
+```
+&lt;div class=&quot;entry&quot;&gt;
+    {{#if author}}
+        &lt;h1&gt;{{firstName}} {{lastName}}&lt;/h1&gt;
+    {{/if}}
+&lt;/div&gt;
+```
+
+```unless``` helper as the inverse of the ```if``` helper
+
+```
+&lt;div class=&quot;entry&quot;&gt;
+    {{#unless license}}
+        &lt;h3 class=&quot;warning&quot;&gt;WARNING&lt;/h3&gt;
+    {{/unless}}
+&lt;/div&gt;
+```
+
+                </section>
+
+                <section data-markdown>
+
+### **Handlebars**
+You can iterate over a list using the built-in ```each``` helper
+
+```
+&lt;ul class=&quot;people_list&quot;&gt;
+    {{#each people}}
+        &lt;li&gt;{{this}}&lt;/li&gt;
+    {{/each}}
+&lt;/ul&gt;
+```
+
+```
+{{#each paragraphs}}
+    &lt;p&gt;{{this}}&lt;/p&gt;
+{{else}}
+    &lt;p class=&quot;empty&quot;&gt;No content&lt;/p&gt;
+{{/each}}
+```
+
+                </section>
+
+
+                <section data-markdown>
+
+### **Handlebars**
+You can shift the context for a section by using the built-in ```with``` block helper
+
+```
+{
+    title: "My first post!",
+    author: {
+        firstName: "Charles",
+        lastName: "Jolley"
+    }
+}
+```
+
+```
+&lt;div class=&quot;entry&quot;&gt;
+    &lt;h1&gt;{{title}}&lt;/h1&gt;
+
+    {{#with author}}
+        &lt;h2&gt;By {{firstName}} {{lastName}}&lt;/h2&gt;
+    {{/with}}
+&lt;/div&gt;
+```
+
+```
+&lt;div class=&quot;entry&quot;&gt;
+    &lt;h1&gt;My first post!&lt;/h1&gt;
+
+    &lt;h2&gt;By Charles Jolley&lt;/h2&gt;
+&lt;/div&gt;
+```
+
+                </section>
+
+
+                <section data-markdown>
+
+### **Spacebars - Template everywhere**
+
+```
+&lt;template name=&quot;forecast&quot;&gt;
+    {{#if myFirstHelper}}
+        &lt;h1&gt;Hello world!&lt;/h1&gt;
+    {{/if}}
+&lt;/template&gt;
+```
+```
+Template.forecast.helpers({
+    myFirstHelper: function () {
+        return true;
+    }
+});
+```
+
+Nested template
+
+```
+&lt;template name=&quot;people-template&quot;&gt;
+    {{#each people}}
+        {{> person}}
+    {{/each}}
+&lt;/template&gt;
+```
+                </section>
+
+                <section data-markdown>
+
+### **Spacebars - Template everywhere**
+
+Register a function to be called when an instance of this template is inserted into the DOM
+
+```
+Template.myTemplate.onRendered(function () {
+    // your content here
+});
+```
+
+Register a function to be called when an instance of this template is created
+
+```
+Template.myTemplate.onCreated(function () {
+    // your content here
+});
+```
+
+Register a function to be called when an instance of this template is removed from the DOM and destroyed
+
+```
+Template.myTemplate.onDestroyed(function () {
+    // your content here
+});
+```
+
+                </section>
+
+                <section data-markdown>
+
+### **Spacebars - Template everywhere**
+
+Find all elements matching selector in this template instance
+
+```
+template.findAll(selector)
+```
+
+Find all elements matching selector in this template instance, and return them as a JQuery object
+
+```
+template.$(selector)
+```
+                </section>
+
+                <section data-markdown>
+
+### **Spacebars - Template everywhere**
+
+```
+&lt;template name=&quot;myTemplate&quot;&gt;
+    &lt;button type=&quot;button&quot;&gt;Click&lt;/button&gt;
+&lt;/template&gt;
+```
+
+```
+Template.myTemplate.events({
+    'click button': function (event, template) {
+        console.log("foo button clicked");
+    }
+});
+```
+
+```click```, ```dblclick```, ```focus```, ```blur```, ```change```, ```mouseenter```, ```mouseleave```, ```mousedown```, ```mouseup```, ```keydown```, ```keypress```, ```keyup``` ...
+
+                </section>
+
+                <section data-markdown>
+
+### **Spacebars - Custom helpers**
+
+```
+Template.profile.helpers({
+    createdAtFormatted: function () {
+        return moment(this.createdAt).format('MM/DD/YYYY, HH:MM');
+    }
+});
+```
+
+```
+&lt;template name=&quot;profile&quot;&gt;
+    &lt;h3&gt;{{name}}&lt;/h3&gt;
+    &lt;h4&gt;{{createdAtFormatted}}&lt;/h4&gt;
+    &lt;p&gt;{{bio}}&lt;/p&gt;
+&lt;/template&gt;
+```
+
+                </section>
+
+                <section data-markdown>
+
+### **Spacebars - Custom helpers**
+
+```
+Template.registerHelper('formatTime', function(myDate) {
+    if(myDate) {
+        return moment(myDate).format('MM/DD/YYYY, hh:mm');
+    }
+});
+```
+
+```
+&lt;template name=&quot;profile&quot;&gt;
+    &lt;h3&gt;{{name}}&lt;/h3&gt;
+    &lt;h4&gt;{{formatTime createdAt}}&lt;/h4&gt;
+    &lt;p&gt;{{bio}}&lt;/p&gt;
+&lt;/template&gt;
+```
+
+                </section>
+
+                <section data-markdown>
+
+### **Spacebars - Smarter Attributes**
+
+```
+&lt;input type=&quot;checkbox&quot; checked=&quot;{{isChecked}}&quot; /&gt;
+```
+
+```
+&lt;input {{attributes}} /&gt;
+```
+
+```
+Template.myTemplate.helpers({
+    attributes: function () {
+        return {
+            name: "myName",
+            class: "myClass anotherClass",
+            value: 123
+        }
+    }
+});
+```
+
+Spacebars will then automatically map out the object to the tag’s attributes
+
+```
+&lt;input name=&quot;myName&quot; class=&quot;myClass anotherClass&quot; value=&quot;123&quot; /&gt;
+```
+
+                </section>
+
+                <section data-markdown>
+
+### **Meteor app structure**
+Basically it's up to you, but Meteor has some standards anyways. 4 main entities
+
+1. #### lib
+2. #### client
+3. #### server
+4. #### public
+
+                </section>
+
+                <section data-markdown>
+
+### **Meteor app structure**
+
+![Alt text](img/meteor_app.png)
+
+                </section>
+
+                <section data-markdown>
+
+### **Iron Router**
+
+A router that works on the server and the browser
+
+```
+Router.route('/', function () {
+    this.render('Home');
+});
+```
+
+```
+Router.route('/items');
+```
+
+```
+Router.route('/item', function () {
+    var req = this.request;
+    var res = this.response;
+    res.end('hello from the server\n');
+}, {where: 'server'});
+```
+
+The where: 'server' option tells the Router this is a server side route
+
+                </section>
+
+				<section data-markdown>
+
+# Thanks!
+
+#### Slides
+#### http://lucazulian.it/slides/meteorjs-19-03-2015
+
+#### Source Code
+#### https://github.com/lucazulian/meteor-todos
+
+### [https://github.com/lucazulian](https://github.com/lucazulian)
+### [@luca_julian](https://twitter.com/luca_julian)
+
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="../js/head.min.js"></script>
+		<script src="../js/reveal.js"></script>
+
+		<script>
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				transition: 'none', // none/fade/slide/convex/concave/zoom
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: '../js/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../js/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../js/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+
+	</body>
+
+    <!-- Google Analytics -->
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-53725859-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+</html>
